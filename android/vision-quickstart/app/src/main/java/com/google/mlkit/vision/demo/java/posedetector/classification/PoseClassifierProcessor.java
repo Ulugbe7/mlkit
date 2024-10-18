@@ -24,6 +24,7 @@ import android.util.Log;
 import androidx.annotation.WorkerThread;
 import com.google.common.base.Preconditions;
 import com.google.mlkit.vision.pose.Pose;
+import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -71,14 +72,14 @@ public class PoseClassifierProcessor {
     try {
       BufferedReader reader = new BufferedReader(
           new InputStreamReader(context.getAssets().open(POSE_SAMPLES_FILE)));
-      String csvLine = reader.readLine();
+      String csvLine = BoundedLineReader.readLine(reader, 5_000_000);
       while (csvLine != null) {
         // If line is not a valid {@link PoseSample}, we'll get null and skip adding to the list.
         PoseSample poseSample = PoseSample.getPoseSample(csvLine, ",");
         if (poseSample != null) {
           poseSamples.add(poseSample);
         }
-        csvLine = reader.readLine();
+        csvLine = BoundedLineReader.readLine(reader, 5_000_000);
       }
     } catch (IOException e) {
       Log.e(TAG, "Error when loading pose samples.\n" + e);
